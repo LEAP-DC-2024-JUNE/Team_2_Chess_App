@@ -1,11 +1,26 @@
-const express = require("express");
+import express from "express";
+import cors from "cors";
+import router from "./routes/authRouter.js";
+import pool from "./db.js";
 
-const server = express();
+const app = express();
+const port = process.env.PORT || 5000;
 
+app.use(cors());
+app.use(express.json());
+app.use("/", router);
 
-server.get("", (request, response) => {
-	response.end("Hello Word");
+pool
+  .getConnection()
+  .then((connection) => {
+    console.log("Successfully connected to the database!");
+    connection.release();
+  })
+  .catch((err) => {
+    console.error("Database connection failed:", err);
+    process.exit(1);
+  });
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
-
-const PORT = 3000;
-server.listen(PORT, () => console.log("Started listening on port " + PORT));
