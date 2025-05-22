@@ -1,4 +1,4 @@
-import ChessboardContainer from "@/componenets/ChessboardContainer";
+import ChessboardContainer from "@/components/ChessboardContainer";
 
 const HomePage = () => {
   return (
