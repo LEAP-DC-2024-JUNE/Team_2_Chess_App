@@ -28,7 +28,7 @@ const ChessboardContainer = () => {
       game.move(possibleMoves[randomIndex]);
     });
   }
-  function onDrop(sourceSquare, targetSquare, piece) {
+  function onDrop(sourceSquare: string, targetSquare: string, piece: string) {
     let move;
     let position = game.fen();
     setGame((game) => {
@@ -55,7 +55,7 @@ const ChessboardContainer = () => {
     return true;
   }
   return (
-    <div className="">
+    <div className="w-[600px] h-[600px]">
       <Chessboard
         id="PlayVsRandom"
         position={game.fen()}

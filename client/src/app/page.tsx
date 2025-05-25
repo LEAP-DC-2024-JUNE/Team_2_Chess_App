@@ -1,9 +1,9 @@
-import Chessboard from "@/components/Chessboard";
+import ChessboardContainer from "@/components/ChessboardContainer";
 
 const HomePage = () => {
   return (
     <div className="w-full flex justify-center">
-      <Chessboard />
+      <ChessboardContainer />
     </div>
   );
 };
