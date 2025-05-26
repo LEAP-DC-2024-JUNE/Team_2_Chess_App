@@ -6,7 +6,7 @@ import { Chessboard } from "react-chessboard";
 
 const ChessboardContainer = () => {
   const [game, setGame] = useState(new Chess());
-  const [currentTimeout, setCurrentTimeout] = useState<NodeJS.Timeout>();
+  // const [currentTimeout, setCurrentTimeout] = useState<NodeJS.Timeout>();
   function safeGameMutate(modify: (game: Chess) => void) {
     setGame((g) => {
       const update = new Chess(g.fen());
@@ -48,10 +48,10 @@ const ChessboardContainer = () => {
     if (move === null) return false;
 
     // store timeout so it can be cleared on undo/reset so computer doesn't execute move
-    const newTimeout = setTimeout(() => {
-      makeRandomMove(position);
-    }, 200);
-    setCurrentTimeout(newTimeout);
+    // const newTimeout = setTimeout(() => {
+    makeRandomMove(position);
+    // }, 200);
+    // setCurrentTimeout(newTimeout);
     return true;
   }
   return (
