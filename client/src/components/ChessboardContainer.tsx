@@ -33,19 +33,22 @@ const ChessboardContainer = () => {
     let position = game.fen();
     setGame((game) => {
       const gameCopy = new Chess(game.fen());
-      move = gameCopy.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: piece[1].toLowerCase() ?? "q",
-      });
-
+      try {
+        move = gameCopy.move({
+          from: sourceSquare,
+          to: targetSquare,
+          promotion: piece[1].toLowerCase() ?? "q",
+        });
+      } catch (error) {
+        console.error("Invalid move" + error);
+      }
       position = gameCopy.fen();
 
       return gameCopy;
     });
 
     // illegal move
-    if (move === null) return false;
+    if (!move) return false;
 
     // store timeout so it can be cleared on undo/reset so computer doesn't execute move
     // const newTimeout = setTimeout(() => {
