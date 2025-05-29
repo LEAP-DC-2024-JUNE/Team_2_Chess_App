@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import io from "socket.io-client";
 
-const SOCKET_SERVER_URL = "http://localhost:5000";
+const SOCKET_SERVER_URL = "https://team-2-chess-app.onrender.com";
 
 const socket = io(SOCKET_SERVER_URL, {
   autoConnect: false,

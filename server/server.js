@@ -11,16 +11,36 @@ import { Server as SocketIoServer } from "socket.io";
 import createDatabasePool from "./db.js";
 const pool = createDatabasePool();
 setDatabasePool(pool);
+
 const app = express();
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
-app.use(cors());
+const allowedOrigins =
+  process.env.NODE_ENV === "production"
+    ? [
+        "https://team-chess-app.vercel.app",
+        "https://team-2-chess-app.onrender.com",
+      ]
+    : [
+        "http://localhost:3000",
+        "https://team-chess-app.vercel.app",
+        "https://team-2-chess-app.onrender.com",
+      ];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use("/", router);
 const io = new SocketIoServer(server, {
   cors: {
-    origin: "https://team-chess-app.vercel.app/",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
