@@ -28,7 +28,12 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/app/layout.jsx",
-    "src/app/page.jsx"
+    "src/app/page.jsx",
+    "src/components/chessGame.js",
+    "src/components/socket.js",
+    "src/components/chessGame.js",
+    "src/components/chessGame.js",
+    "src/components/HomePage.jsx"
   ],
   "exclude": ["node_modules"]
 }

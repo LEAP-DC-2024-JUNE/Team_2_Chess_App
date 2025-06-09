@@ -1,13 +1,15 @@
 // import ChessboardContainer from "@/components/ChessboardContainer";
-import ChessGame from "../components/chessGame";
+// import ChessGame from "../components/chessGame";
+import HomePage from "../components/HomePage";
 // 3c1d0e
-const HomePage = () => {
+const Home = () => {
   return (
-    <div className="w-full min-h-screen flex justify-center items-center">
+    <div className="w-full min-h-screen bg-[#151618]">
       {/* <ChessboardContainer /> */}
-      <ChessGame />
+      {/* <ChessGame /> */}
+      <HomePage />
     </div>
   );
 };
 
-export default HomePage;
+export default Home;

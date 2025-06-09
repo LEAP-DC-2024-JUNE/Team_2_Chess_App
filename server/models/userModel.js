@@ -27,3 +27,16 @@ export async function findUserByEmail(email) {
     throw error;
   }
 }
+export async function findUserById(id) {
+  const pool = getDatabasePool();
+  try {
+    const [rows] = await pool.execute(
+      "SELECT id, username, email FROM users WHERE id = ?",
+      [id]
+    );
+    return rows.length > 0 ? rows[0] : null;
+  } catch (error) {
+    console.error("Error in findUserById model:", error);
+    throw error;
+  }
+}
