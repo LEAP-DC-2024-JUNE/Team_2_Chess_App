@@ -10,6 +10,7 @@ import { findUserById } from "./models/userModel.js";
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 const activeGames = {};
+const rematchRequests = {};
 const funnyCaptureMessages = [
   "So easy!",
   "Just give up already!",
@@ -18,6 +19,10 @@ const funnyCaptureMessages = [
   "Why don't u cry?",
   "U are not that good",
   "Braindead",
+  "Another piece captured. 🎉",
+  "Mission accomplished: Piece acquired! ✅",
+  "Oops, did I do that? 💨",
+  "Your are so trash🗑️",
 ];
 function initializeSocketIo(io) {
   io.use(async (socket, next) => {
@@ -63,6 +68,8 @@ function initializeSocketIo(io) {
           pgn: "",
           whitePlayerUsername: username,
           blackPlayerUsername: null,
+          player1SocketId: socket.id,
+          player2SocketId: null,
         };
         socket.join(newGameId);
         socket.emit("gameCreated", { gameId: newGameId, playerColor: "w" });
@@ -96,6 +103,7 @@ function initializeSocketIo(io) {
 
         activeGames[gameId].player2Id = userId;
         activeGames[gameId].blackPlayerUsername = username;
+        activeGames[gameId].player2SocketId = socket.id;
         socket.join(gameId);
         socket.emit("gameJoined", { gameId: gameId, playerColor: "b" });
 
@@ -234,10 +242,17 @@ function initializeSocketIo(io) {
                 game.chessInstance.fen(),
                 game.pgn
               );
-              delete activeGames[gameId];
               console.log(
                 `Game ${gameId} finalized and removed from activeGames.`
               );
+              setTimeout(() => {
+                if (activeGames[gameId] && !rematchRequests[gameId]) {
+                  delete activeGames[gameId];
+                  console.log(
+                    `Game ${gameId} removed from activeGames after timeout (no rematch).`
+                  );
+                }
+              }, 60000);
             } catch (dbError) {
               console.error("Error finalizing game record in DB:", dbError);
               socket.emit("gameError", {
@@ -250,7 +265,108 @@ function initializeSocketIo(io) {
         }
       }
     );
+    socket.on("requestRematch", async ({ gameId }) => {
+      const userId = socket.userId;
+      const game = activeGames[gameId];
 
+      if (!game || !(game.player1Id === userId || game.player2Id === userId)) {
+        socket.emit("gameError", {
+          message: "Invalid game or not a participant.",
+        });
+        return;
+      }
+
+      if (!rematchRequests[gameId]) {
+        rematchRequests[gameId] = {};
+      }
+
+      rematchRequests[gameId][userId] = true;
+      console.log(`User ${userId} requested rematch for game ${gameId}`);
+
+      const player1Requested = rematchRequests[gameId][game.player1Id];
+      const player2Requested = rematchRequests[gameId][game.player2Id];
+
+      if (player1Requested && player2Requested) {
+        console.log(
+          `Both players requested rematch for game ${gameId}. Initiating new game.`
+        );
+        delete rematchRequests[gameId];
+        const newGameId = uuidv4();
+        const newWhitePlayerId = game.player2Id;
+        const newBlackPlayerId = game.player1Id;
+        const newWhitePlayerUsername = game.blackPlayerUsername;
+        const newBlackPlayerUsername = game.whitePlayerUsername;
+
+        activeGames[newGameId] = {
+          game_id: newGameId,
+          player1Id: newWhitePlayerId,
+          player2Id: newBlackPlayerId,
+          chessInstance: new Chess(),
+          turn: "w",
+          pgn: "",
+          whitePlayerUsername: newWhitePlayerUsername,
+          blackPlayerUsername: newBlackPlayerUsername,
+          player1SocketId: game.player2SocketId,
+          player2SocketId: game.player1SocketId,
+        };
+
+        if (io.sockets.sockets.get(game.player1SocketId)) {
+          io.sockets.sockets.get(game.player1SocketId).join(newGameId);
+        }
+        if (io.sockets.sockets.get(game.player2SocketId)) {
+          io.sockets.sockets.get(game.player2SocketId).join(newGameId);
+        }
+
+        try {
+          await createGameRecord(
+            newGameId,
+            newWhitePlayerId,
+            newBlackPlayerId,
+            activeGames[newGameId].chessInstance.fen()
+          );
+        } catch (dbError) {
+          console.error("Error creating rematch game record in DB:", dbError);
+          io.to(game.player1SocketId).emit("gameError", {
+            message: "Failed to create rematch game.",
+          });
+          io.to(game.player2SocketId).emit("gameError", {
+            message: "Failed to create rematch game.",
+          });
+          delete activeGames[newGameId];
+          return;
+        }
+
+        io.to(newGameId).emit("rematchAccepted", {
+          gameId: newGameId,
+          fen: activeGames[newGameId].chessInstance.fen(),
+          turn: activeGames[newGameId].chessInstance.turn(),
+          whitePlayerUsername: activeGames[newGameId].whitePlayerUsername,
+          blackPlayerUsername: activeGames[newGameId].blackPlayerUsername,
+          player1Color: "w",
+          player2Color: "b",
+        });
+
+        delete activeGames[gameId];
+        console.log(
+          `Old game ${gameId} removed from activeGames after successful rematch.`
+        );
+      } else {
+        socket.emit("message", {
+          message: "Rematch request sent. Waiting for opponent.",
+        });
+        const otherPlayerId =
+          game.player1Id === userId ? game.player2Id : game.player1Id;
+        const otherPlayerSocketId =
+          game.player1Id === userId
+            ? game.player2SocketId
+            : game.player1SocketId;
+        if (otherPlayerSocketId) {
+          io.to(otherPlayerSocketId).emit("message", {
+            message: `${socket.username} has requested a rematch!`,
+          });
+        }
+      }
+    });
     socket.on("chatMessage", ({ gameId, message }) => {
       if (!gameId || !message || !socket.userId || !socket.username) {
         socket.emit("chatError", {
@@ -290,23 +406,39 @@ function initializeSocketIo(io) {
           activeGames[gameId].player1Id === socket.userId ||
           activeGames[gameId].player2Id === socket.userId
         ) {
-          const disconnectedPlayerColor =
-            activeGames[gameId].player1Id === socket.userId ? "White" : "Black";
-          const winningPlayerColor =
-            disconnectedPlayerColor === "White" ? "Black" : "White";
+          const game = activeGames[gameId];
+          let winningPlayerColor;
+          let disconnectedPlayerColor;
+
+          if (game.player1Id === socket.userId) {
+            disconnectedPlayerColor = "White";
+            winningPlayerColor = "Black";
+          } else {
+            disconnectedPlayerColor = "Black";
+            winningPlayerColor = "White";
+          }
           const result = `${winningPlayerColor} wins by abandonment!`;
+          const finalResultStatus =
+            winningPlayerColor === "White" ? "1-0" : "0-1";
 
           io.to(gameId).emit("playerDisconnected", {
             message: `Opponent disconnected. ${result}`,
+            status: finalResultStatus,
           });
 
           try {
-            await endGameRecord(gameId, result);
+            await endGameRecord(
+              gameId,
+              finalResultStatus,
+              game.chessInstance.fen(),
+              game.pgn
+            );
           } catch (dbError) {
             console.error("Error updating game record on disconnect:", dbError);
           }
 
           delete activeGames[gameId];
+          delete rematchRequests[gameId];
           console.log(`Game ${gameId} ended due to player disconnect.`);
           break;
         }

@@ -77,7 +77,7 @@ const LoginPage = () => {
         <div className="absolute top-[-50px] left-[-50px] w-40 h-40 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 "></div>
         <div className="absolute bottom-[-50px] right-[-50px] w-40 h-40 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-30  animation-delay-2000"></div>
         <h2 className="text-4xl font-extrabold mb-8 text-white tracking-wide">
-          Blitz
+          Ultimatechess
         </h2>
 
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">

@@ -77,9 +77,11 @@ const UserForm = () => {
   return (
     <div className="min-h-screen bg-[#151618] flex items-center justify-center p-4">
       <div className="max-w-md w-full mx-auto p-8 bg-white/5 rounded-xl shadow-2xl border border-gray-700 text-center relative overflow-hidden">
-        <div className="absolute top-[-50px] left-[-50px] w-40 h-40 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
-        <div className="absolute bottom-[-50px] right-[-50px] w-40 h-40 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animation-delay-2000"></div>
-
+        <div className="absolute top-[-50px] left-[-50px] w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
+        <div className="absolute bottom-[-50px] right-[-50px] w-40 h-40  rounded-full mix-blend-multiply filter blur-xl opacity-30 animation-delay-2000"></div>
+        <h2 className="text-4xl font-extrabold mb-8 text-white tracking-wide">
+          Ultimatechess
+        </h2>
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
           <div className="text-left relative">
             <label
