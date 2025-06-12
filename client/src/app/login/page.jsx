@@ -79,7 +79,6 @@ const LoginPage = () => {
         <h2 className="text-4xl font-extrabold mb-8 text-white tracking-wide">
           Ultimatechess
         </h2>
-
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
           <div className="text-left relative">
             <label

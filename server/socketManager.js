@@ -233,7 +233,10 @@ function initializeSocketIo(io) {
               finalResultStatus = "1/2-1/2";
               resultText = "Draw by insufficient material!";
             }
-            io.to(gameId).emit("gameOver", { result: resultText });
+            io.to(gameId).emit("gameOver", {
+              result: resultText,
+              status: finalResultStatus,
+            });
 
             try {
               await endGameRecord(
@@ -342,8 +345,8 @@ function initializeSocketIo(io) {
           turn: activeGames[newGameId].chessInstance.turn(),
           whitePlayerUsername: activeGames[newGameId].whitePlayerUsername,
           blackPlayerUsername: activeGames[newGameId].blackPlayerUsername,
-          player1Color: "w",
-          player2Color: "b",
+          newWhitePlayerId: newWhitePlayerId,
+          newBlackPlayerId: newBlackPlayerId,
         });
 
         delete activeGames[gameId];

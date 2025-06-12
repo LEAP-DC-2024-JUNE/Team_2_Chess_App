@@ -1,7 +1,5 @@
-// import ChessboardContainer from "@/components/ChessboardContainer";
-// import ChessGame from "../components/chessGame";
 import HomePage from "../components/HomePage";
-import Header from "@/components/Header";
+
 import {
   Card,
   CardContent,
@@ -9,14 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 // 3c1d0e
 const Home = () => {
-  const test = () => {
-    redirect("/login");
-  };
   return (
     <div className="h-full flex items-center justify-center">
       <HomePage />
@@ -29,7 +22,7 @@ const Home = () => {
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-8">
           <Link
-            href={"/online"}
+            href={"/login"}
             className="w-full bg-gray-300 text-black text-xl text-center font-bold py-8 rounded-lg hover:opacity-75 hover:bg-gray-300 cursor-pointer"
           >
             Play Online

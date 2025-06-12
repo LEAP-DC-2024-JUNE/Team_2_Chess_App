@@ -4,7 +4,6 @@ import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { socket } from "./socket";
 import { SendHorizonal } from "lucide-react";
-import ProfileModal from "../components/Header/ProfileModal";
 const ChessGame = () => {
   const [gameId, setGameId] = useState(null);
   const [chess] = useState(new Chess());
@@ -136,7 +135,7 @@ const ChessGame = () => {
       setBoardFen(data.fen);
       setTurn(data.turn);
       setMovesList(chess.history());
-      if (data.capture && data.captureMessage) {
+      if (data.captureMessage) {
         setCaptureMessage(data.captureMessage);
         setTimeout(() => setCaptureMessage(""), 3000);
       } else {
@@ -349,11 +348,6 @@ const ChessGame = () => {
     socket.emit("requestRematch", { gameId });
   };
 
-  const handleNewGameFromModal = () => {
-    setShowRematchModal(false);
-    createNewGame();
-  };
-
   const handleGoHomeFromModal = () => {
     setShowRematchModal(false);
     setGameId(null);
@@ -390,11 +384,8 @@ const ChessGame = () => {
   console.log(captureMessage);
   return (
     <div>
-      <div>
-        <ProfileModal username={username} />
-      </div>
       <div className="flex px-10 py-10 justify-evenly h-screen">
-        <div className="flex flex-col gap-2 items-center justify-center">
+        <div className="flex flex-col gap-2 items-center justify-center ">
           <div>
             {gameId && (
               <div className="bg-green-700 p-4 rounded-xl shadow-lg w-[400px] h-[400px]">
@@ -469,7 +460,7 @@ const ChessGame = () => {
         <div>
           <div>
             {message && (
-              <p className="text-xl font-bold mt-4 text-green-500">{message}</p>
+              <p className="text-xl font-bold mt-8 text-green-500">{message}</p>
             )}
             {captureMessage && (
               <p className="text-2xl font-bold mt-2 mb-4 text-yellow-600 animate-bounce-in">
@@ -478,9 +469,6 @@ const ChessGame = () => {
             )}
             <div className="flex mt-4 gap-8">
               <div className="flex flex-col gap-2">
-                <div className="box-border border-2 rounded-2xl bg-gray-200 px-2 max-w-[150px] font-bold">
-                  <p>{username}</p>
-                </div>
                 <div className="w-[670px] h-[700px]">
                   <Chessboard
                     position={boardFen}
@@ -588,29 +576,23 @@ const ChessGame = () => {
             {showRematchModal && (
               <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
                 <div className="bg-white p-8 rounded-lg shadow-xl text-center flex flex-col gap-4">
-                  <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  <h2 className="text-3xl font-bold text-gray-500 mb-4">
                     Game Over!
                   </h2>
-                  <p className="text-2xl font-semibold text-green-700 mb-6">
+                  <p className="text-2xl font-bold mb-6 text-gray-950">
                     {gameOverMessage}
                   </p>
 
                   <div className="flex flex-col gap-4">
                     <button
                       onClick={handleRematchRequest}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out transform hover:scale-105"
+                      className="bg-green-400 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out transform hover:scale-105"
                     >
                       Request Rematch
                     </button>
                     <button
-                      onClick={handleNewGameFromModal}
-                      className="bg-gray-400 hover:bg-gray-500 text-gray-800 font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out transform hover:scale-105"
-                    >
-                      Start New Game
-                    </button>
-                    <button
                       onClick={handleGoHomeFromModal}
-                      className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out transform hover:scale-105"
+                      className="bg-gray-600 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out transform hover:scale-105"
                     >
                       Go Home
                     </button>

@@ -3,10 +3,19 @@
 import React, { useState, useEffect } from "react";
 import { socket } from "./socket";
 import Link from "next/link";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 const Header = () => {
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
@@ -52,18 +61,39 @@ const Header = () => {
       socket.disconnect();
     };
   }, [userId, username]);
+  const handleSignout = () => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("username");
+    setUsername("");
+    setUserId("");
 
+    if (socket.connected) {
+      socket.disconnect();
+    }
+
+    router.push("/");
+  };
   return (
     <div className="text-xl w-full text-white bg-gray-500 py-4 px-8 flex justify-between items-center absolute top-0">
       <Link href={"/"} className="text-3xl font-medium">
         Ultimate Chess
       </Link>
       {username ? (
-        // <p>
-        //   Logged in as: <span className="font-semibold">{username}</span> (ID:
-        //   {userId})
-        // </p>
-        <p>{username}</p>
+        <div className="bg-gray-500 text-center text-xl rounded-2xl">
+          <DropdownMenu>
+            <DropdownMenuTrigger>Profile</DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>My profile</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Match History</DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSignout}>
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ) : (
         <p className="flex items-center gap-8">
           <a
